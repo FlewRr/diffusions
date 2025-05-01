@@ -42,16 +42,14 @@ class DDPM(nn.Module):
     def save_checkpoint(self, checkpoint_path:str):
         torch.save(self.model.state_dict(), checkpoint_path)
 
-    def sample_xt(self, x0: torch.Tensor, t: torch.Tensor, alphas_hat: torch.Tensor, noise: torch.Tensor=None):
+    def sample_xt(self, x0: torch.Tensor, t: torch.Tensor, noise: torch.Tensor=None):
         if noise is None:
             noise = torch.randn_like(x0)
 
         t = t.cpu()
-        print(t)
-        sqrt_alpha_hat = alphas_hat[t].sqrt().view(-1, 1, 1, 1).to(self.device)
-        minus_sqrt_alpha_hat = (1. - alphas_hat[t]).sqrt().view(-1, 1, 1, 1).to(self.device)
+        sqrt_alpha_hat = self.alphas_hat[t].sqrt().view(-1, 1, 1, 1).to(self.device)
+        minus_sqrt_alpha_hat = (1. - self.alphas_hat[t]).sqrt().view(-1, 1, 1, 1).to(self.device)
 
-        print(x0, sqrt_alpha_hat, minus_sqrt_alpha_hat, noise)
         return x0 * sqrt_alpha_hat + minus_sqrt_alpha_hat * noise
 
     def training_step(self, batch) -> float:
@@ -60,7 +58,7 @@ class DDPM(nn.Module):
         t = torch.randint(0, self.T, (batch.shape[0],), device=self.device)
         noise = torch.randn_like(batch)
 
-        noisy_batch = self.sample_xt(x0=batch, t=t, alphas_hat=self.alphas_hat, noise=noise)
+        noisy_batch = self.sample_xt(x0=batch, t=t, noise=noise)
         noisy_pred = self.model(noisy_batch, t)
 
         loss = F.mse_loss(noisy_pred, noise)
