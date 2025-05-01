@@ -1,0 +1,38 @@
+data_path: ""
+batch_size: 32
+epochs: 10
+
+input_channels: 3
+output_channels: 3
+hidden_channels: 64
+time_embedding_dim: 256
+image_size: [32, 32]
+image_channels: 3
+
+dataset:
+    data_path: "cifar10/"
+    use_cifar10: True
+
+scheduler:
+  scheduler: "cosine"
+  timesteps: 100
+  s: 0.008
+
+#scheduler:
+#  scheduler: "linear"
+#  beta_min: 1e-4
+#  beta_max: 0.02
+#  timesteps: 100
+
+lr: 1e-4
+betas: [0.9, 0.999]
+device: "cpu"
+
+use_wandb: True
+use_ema: True
+ema_decay: 0.999
+eval_num_samples: 1
+eval_sampling_epochs: 5
+save_checkpoints: True
+save_checkpoints_epochs: 5
+save_checkpoints_path: "checkpoints/"
