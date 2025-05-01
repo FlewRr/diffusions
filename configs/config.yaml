@@ -1,4 +1,3 @@
-data_path: ""
 batch_size: 32
 epochs: 10
 
@@ -26,7 +25,7 @@ scheduler:
 
 lr: 1e-4
 betas: [0.9, 0.999]
-device: "cpu"
+device: "cuda"
 
 use_wandb: True
 use_ema: True
