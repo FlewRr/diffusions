@@ -50,6 +50,7 @@ class DDPM(nn.Module):
         sqrt_alpha_hat = alphas_hat[t].sqrt().view(-1, 1, 1, 1).to(self.device)
         minus_sqrt_alpha_hat = (1. - alphas_hat[t]).sqrt().view(-1, 1, 1, 1).to(self.device)
 
+        print(x0, sqrt_alpha_hat, minus_sqrt_alpha_hat, noise)
         return x0 * sqrt_alpha_hat + minus_sqrt_alpha_hat * noise
 
     def training_step(self, batch) -> float:
