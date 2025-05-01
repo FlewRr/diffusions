@@ -24,8 +24,7 @@ def main(config_path: Path, wandb_key: str = ""):
             name="ddpm_run")
 
     trainer = DDPMTrainer(ddpm, ddpm_config)
-    # trainer.train()
-    trainer._save_checkpoint(0)
+    trainer.train()
 
 if __name__ == "__main__":
     main()
