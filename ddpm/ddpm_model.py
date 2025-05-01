@@ -15,7 +15,7 @@ class DDPM(nn.Module):
         super().__init__()
         self.config = config
         self.model = UnetWithAttention(in_channels=config.input_channels, hid_channels=config.hidden_channels,
-                                       out_channels=config.output_channels, time_emb_dim=config.time_embedding_dim)
+                                       out_channels=config.output_channels, time_emb_dim=config.time_embedding_dim).to(self.config.device)
 
         self.scheduler = self._setup_scheduler()
         self.alphas, self.alphas_hat = self.scheduler.get_alphas()
