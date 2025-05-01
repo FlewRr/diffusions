@@ -47,6 +47,7 @@ class DDPM(nn.Module):
             noise = torch.randn_like(x0)
 
         t = t.cpu()
+        print(t)
         sqrt_alpha_hat = alphas_hat[t].sqrt().view(-1, 1, 1, 1).to(self.device)
         minus_sqrt_alpha_hat = (1. - alphas_hat[t]).sqrt().view(-1, 1, 1, 1).to(self.device)
 
