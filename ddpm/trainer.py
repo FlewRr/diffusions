@@ -42,7 +42,7 @@ class DDPMTrainer:
             return dataloader
         else:
             dataset = DDPMDataset(self.config.dataset.data_path, self.transform)
-            dataloader = torch.utils.data.DataLoader(dataset, batch_size=self.config.batch_size, shuffle=True)
+            dataloader = torch.utils.data.DataLoader(dataset, batch_size=self.config.batch_size, shuffle=True, num_workers=4, pin_memory=True)
 
             return dataloader
 

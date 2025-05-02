@@ -18,8 +18,8 @@ class DDPM(nn.Module):
                                        out_channels=config.output_channels, time_emb_dim=config.time_embedding_dim).to(self.config.device)
 
         self.scheduler = self._setup_scheduler()
-        self.alphas, self.alphas_hat = self.scheduler.get_alphas()
-        self.betas, self.betas_hat = self.scheduler.get_betas()
+        self.alphas, self.alphas_hat = self.scheduler.get_alphas(device=self.config.device)
+        self.betas, self.betas_hat = self.scheduler.get_betas(device=self.config.device)
 
         self.T = self.config.scheduler.timesteps
         self.image_size = self.config.image_size
@@ -46,9 +46,9 @@ class DDPM(nn.Module):
         if noise is None:
             noise = torch.randn_like(x0)
 
-        t = t.cpu()
-        sqrt_alpha_hat = self.alphas_hat[t].sqrt().view(-1, 1, 1, 1).to(self.device)
-        minus_sqrt_alpha_hat = (1. - self.alphas_hat[t]).sqrt().view(-1, 1, 1, 1).to(self.device)
+        t = t
+        sqrt_alpha_hat = self.alphas_hat[t].sqrt().view(-1, 1, 1, 1)
+        minus_sqrt_alpha_hat = (1. - self.alphas_hat[t]).sqrt().view(-1, 1, 1, 1)
 
         return x0 * sqrt_alpha_hat + minus_sqrt_alpha_hat * noise
 

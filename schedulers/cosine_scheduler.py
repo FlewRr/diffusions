@@ -29,8 +29,8 @@ class CosineScheduler(Scheduler):
 
         return betas, betas_hat
 
-    def get_betas(self):
-        return self.betas, self.betas_hat
+    def get_betas(self, device: str="cpu"):
+        return self.betas.to(device), self.betas_hat.to(device)
 
-    def get_alphas(self):
-        return self.alphas, self.alphas_hat
+    def get_alphas(self, device: str="cpu"):
+        return self.alphas.to(device), self.alphas_hat.to(device)
