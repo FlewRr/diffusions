@@ -79,7 +79,7 @@ class DDPMTrainer:
 
     def _log_wandb(self, total_loss: float, epoch: int):
 
-        wandb.log({"loss": total/_loss, "epoch": epoch})
+        wandb.log({"loss": total_loss, "epoch": epoch})
 
         if epoch % self.config.eval_sampling_epochs == 0:
             model = self.ddpm.get_model()
