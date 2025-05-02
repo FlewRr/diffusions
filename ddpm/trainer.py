@@ -5,6 +5,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torchvision import transforms as T
+from tqdm import tqdm
 import wandb
 
 
@@ -100,7 +101,8 @@ class DDPMTrainer:
         for epoch in range(1, self.epochs+1):
             total_loss = 0.
 
-            for batch in self.dataloader:
+            epoch_bar = tqdm(self.dataloader, desc=f"Epoch {epoch}/{self.epochs}", leave=False)
+            for batch in epoch_bar:
                 loss = self.ddpm.training_step(batch)
                 loss.backward()
 
@@ -108,10 +110,12 @@ class DDPMTrainer:
                 self.optimizer.zero_grad()
 
                 total_loss += loss.item()
+                epoch_bar.set_postfix(loss=loss.item())
 
                 if self.use_ema:
                     self.ema.update(self.ddpm.get_model())
 
+            total_loss /= len(self.dataloader)
             if self.use_wandb:
                 self._log_wandb(total_loss, epoch)
 

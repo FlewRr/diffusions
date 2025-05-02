@@ -15,7 +15,7 @@ scheduler:
   s: 0.008
 lr: 1e-4
 betas: [0.9, 0.999]
-device: "cuda"
+device: "cpu"
 use_wandb: True
 use_ema: True
 ema_decay: 0.999
