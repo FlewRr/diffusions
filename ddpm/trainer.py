@@ -76,14 +76,14 @@ class DDPMTrainer:
 
     def _log_wandb(self, total_loss: float, epoch: int):
 
-        # wandb.log({"loss": total/_loss, "epoch": epoch})
+        wandb.log({"loss": total/_loss, "epoch": epoch})
 
         if epoch % self.config.eval_sampling_epochs == 0:
             model = self.ddpm.get_model()
 
             self.ema.apply_shadow(model)
             sampled_images = self.ddpm.sample(self.eval_num_samples)
-            # self._log_wandb_images(sampled_images, epoch)
+            self._log_wandb_images(sampled_images, epoch)
             self.ema.restore(model)
 
     def _save_checkpoint(self, epoch: int):
