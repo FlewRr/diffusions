@@ -40,6 +40,7 @@ class DDPMConfig(BaseModel):
 
     use_wandb: bool
     use_ema: bool
+    use_amp: bool
     ema_decay: float
     eval_num_samples: int
     eval_sampling_epochs: int

@@ -29,6 +29,9 @@ class DDPMTrainer:
 
         self.use_ema = self.config.use_ema
         self.ema_decay = self.config.ema_decay
+        self.use_amp = self.config.use_amp
+
+        self.scaler = torch.amp.GradScaler(self.config.device, enabled=self.use_amp)
 
         if self.use_ema:
             self.ema = EMA(self.ddpm.get_model(), self.ema_decay)
@@ -104,10 +107,15 @@ class DDPMTrainer:
             epoch_bar = tqdm(self.dataloader, desc=f"Epoch {epoch}/{self.epochs}", leave=False)
             for batch in epoch_bar:
                 loss = self.ddpm.training_step(batch)
-                loss.backward()
-
-                self.optimizer.step()
                 self.optimizer.zero_grad()
+
+                if self.use_amp:
+                    self.scaler.scale(loss).backward()
+                    self.scaler.step(self.optimizer)
+                    self.scaler.update()
+                else:
+                    loss.backward()
+                    self.optimizer.step()
 
                 total_loss += loss.item()
                 epoch_bar.set_postfix(loss=loss.item())

@@ -25,6 +25,7 @@ class DDPM(nn.Module):
         self.image_size = self.config.image_size
         self.image_channels = self.config.image_channels
         self.device = self.config.device
+        self.use_amp = self.config.use_amp
 
     def _setup_scheduler(self):
         match self.config.scheduler:
@@ -59,9 +60,11 @@ class DDPM(nn.Module):
         noise = torch.randn_like(batch)
 
         noisy_batch = self.sample_xt(x0=batch, t=t, noise=noise)
-        noisy_pred = self.model(noisy_batch, t)
 
-        loss = F.mse_loss(noisy_pred, noise)
+        with torch.amp.autocast(device_type=self.device, enabled=self.use_amp):
+            noisy_pred = self.model(noisy_batch, t)
+            loss = F.mse_loss(noisy_pred, noise)
+
         return loss
 
     @torch.no_grad()
