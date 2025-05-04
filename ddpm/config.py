@@ -47,6 +47,7 @@ class DDPMConfig(BaseModel):
     save_checkpoints: bool
     save_checkpoints_epochs: int
     save_checkpoints_path: str
+    num_workers: int
 
     scheduler: SchedulerConfig
     dataset: DatasetConfig

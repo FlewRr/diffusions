@@ -40,12 +40,12 @@ class DDPMTrainer:
         if self.config.dataset.use_cifar10:
             dataset = CIFAR10ImagesOnly(root=self.config.dataset.data_path, train=True,
                                                     download=True, transform=self.transform)
-            dataloader = torch.utils.data.DataLoader(dataset, batch_size=self.config.batch_size, shuffle=True)
+            dataloader = torch.utils.data.DataLoader(dataset, batch_size=self.config.batch_size, shuffle=True, num_workers=self.config.num_workers, pin_memory=True)
 
             return dataloader
         else:
             dataset = DDPMDataset(self.config.dataset.data_path, self.transform)
-            dataloader = torch.utils.data.DataLoader(dataset, batch_size=self.config.batch_size, shuffle=True, num_workers=4, pin_memory=True)
+            dataloader = torch.utils.data.DataLoader(dataset, batch_size=self.config.batch_size, shuffle=True, num_workers=self.config.num_workers, pin_memory=True)
 
             return dataloader
 
@@ -79,7 +79,7 @@ class DDPMTrainer:
 
     def _log_wandb(self, total_loss: float, epoch: int):
 
-        wandb.log({"loss": total_loss, "epoch": epoch})
+        wandb.log({"loss": total_loss})
 
         if epoch % self.config.eval_sampling_epochs == 0:
             model = self.ddpm.get_model()
