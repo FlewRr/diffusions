@@ -1,9 +1,8 @@
-from ddpm import DDPM, DDPMDataset, CIFAR10ImagesOnly
-from ddpm.ema import EMA
+from diffusions import DDPM, DDPMDataset, CIFAR10ImagesOnly
+from diffusions.utils.ema import EMA
 import os
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
 from torchvision import transforms as T
 from tqdm import tqdm
 import wandb

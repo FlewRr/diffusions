@@ -1,7 +1,6 @@
-from schedulers.cosine_scheduler import CosineScheduler
-from schedulers.linear_scheduler import LinearScheduler
-from ddpm.unet import UnetWithAttention
-from ddpm import DDPM
+from diffusions.schedulers import LinearScheduler
+from diffusions.unet import UnetWithAttention
+from diffusions import DDPM
 import torch
 
 

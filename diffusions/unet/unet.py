@@ -1,7 +1,7 @@
 import torch.nn as nn
-from ddpm.unet.utils import ConvBlock, SinusoidalTimeEmbedding
-from ddpm.unet.decoder import DecoderWithAttention
-from ddpm.unet.encoder import EncoderWithAttention
+from diffusions.unet.utils import ConvBlock, SinusoidalTimeEmbedding
+from diffusions.unet.decoder import DecoderWithAttention
+from diffusions.unet.encoder import EncoderWithAttention
 
 
 class UnetWithAttention(nn.Module):

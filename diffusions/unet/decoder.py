@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-from ddpm.unet.utils import ConvBlock, SelfAttention2D
+from diffusions.unet.utils import ConvBlock, SelfAttention2D
 
 class DecoderWithAttention(nn.Module):
     def __init__(self, in_channels, hid_channels, time_emb_dim):

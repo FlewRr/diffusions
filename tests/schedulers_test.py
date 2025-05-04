@@ -1,7 +1,5 @@
-from schedulers.cosine_scheduler import CosineScheduler
-from schedulers.linear_scheduler import LinearScheduler
-import torch
-
+from diffusions.schedulers import CosineScheduler
+from diffusions.schedulers import LinearScheduler
 
 if __name__ == "__main__":
     linear_scheduler = LinearScheduler(100, 1e-4, 0.02)

@@ -1,5 +1,5 @@
 import torch.nn as nn
-from ddpm.unet.utils import ConvBlock, SelfAttention2D
+from diffusions.unet.utils import ConvBlock, SelfAttention2D
 
 class EncoderWithAttention(nn.Module):
     def __init__(self, in_channels=3, hid_channels=64, time_emb_dim=256):

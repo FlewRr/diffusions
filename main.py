@@ -1,5 +1,5 @@
 import click
-from ddpm import DDPM, DDPMConfig, DDPMTrainer
+from diffusions import DDPM, DDPMConfig, DDPMTrainer
 import os
 from pathlib import Path
 import wandb

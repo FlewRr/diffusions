@@ -1,31 +1,35 @@
-from typing import Tuple
-
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from ddpm.config import CosineSchedulerConfig, LinearSchedulerConfig
-from ddpm.unet import UnetWithAttention
-from schedulers.cosine_scheduler import CosineScheduler
-from schedulers.linear_scheduler import LinearScheduler
-from schedulers.scheduler import Scheduler
+from diffusions.ddpm.ddpm_config import CosineSchedulerConfig, LinearSchedulerConfig
+from diffusions.schedulers.cosine_scheduler import CosineScheduler
+from diffusions.schedulers.linear_scheduler import LinearScheduler
+from diffusions.unet import UnetWithAttention
+
 
 class DDPM(nn.Module):
     def __init__(self, config):
         super().__init__()
         self.config = config
         self.model = UnetWithAttention(in_channels=config.input_channels, hid_channels=config.hidden_channels,
-                                       out_channels=config.output_channels, time_emb_dim=config.time_embedding_dim).to(self.config.device)
+                                       out_channels=config.output_channels, time_emb_dim=config.time_embedding_dim)
 
         self.scheduler = self._setup_scheduler()
-        self.alphas, self.alphas_hat = self.scheduler.get_alphas(device=self.config.device)
-        self.betas, self.betas_hat = self.scheduler.get_betas(device=self.config.device)
 
         self.T = self.config.scheduler.timesteps
         self.image_size = self.config.image_size
         self.image_channels = self.config.image_channels
         self.device = self.config.device
         self.use_amp = self.config.use_amp
+
+        alphas, alphas_hat = self.scheduler.get_alphas()
+        betas, betas_hat = self.scheduler.get_betas()
+
+        self.register_buffer("alphas", alphas)
+        self.register_buffer("alphas_hat", alphas_hat)
+        self.register_buffer("betas", betas)
+        self.register_buffer("betas_hat", betas_hat)
 
     def _setup_scheduler(self):
         match self.config.scheduler:
@@ -47,7 +51,7 @@ class DDPM(nn.Module):
         if noise is None:
             noise = torch.randn_like(x0)
 
-        t = t
+
         sqrt_alpha_hat = self.alphas_hat[t].sqrt().view(-1, 1, 1, 1)
         minus_sqrt_alpha_hat = (1. - self.alphas_hat[t]).sqrt().view(-1, 1, 1, 1)
 
@@ -71,6 +75,7 @@ class DDPM(nn.Module):
     def sample(self, num_samples: int=1):
         x_t = torch.randn(num_samples, self.image_channels, self.image_size[0], self.image_size[1], device=self.device)
 
+        ## TODO: store alphsas in cpu and transfer to cuda when  needed
         for t in reversed(range(self.T)):
             t_batch = torch.full((num_samples,), t, device=self.device, dtype=torch.long)
 
