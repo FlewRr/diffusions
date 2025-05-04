@@ -43,6 +43,7 @@ class BaseDiffusionModel(nn.Module, ABC):
 
     def load_from_checkpoint(self, checkpoint_path: str):
         self.model.load_state_dict(torch.load(checkpoint_path, weights_only=True))
+        self.model.load_state_dict(torch.load(checkpoint_path, weights_only=True, map_location=torch.device(self.device)))
 
     def sample_images(self, num_samples:int):
         sampled_images = self.sample(num_samples)
