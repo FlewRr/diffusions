@@ -1,8 +1,9 @@
-from diffusions.config import DatasetConfig, SchedulerConfig
 from pydantic import BaseModel, Field
 from typing import Tuple, Annotated, Literal, Optional
 
-class DDPMConfig(BaseModel):
+from diffusions.config import DatasetConfig, SchedulerConfig
+
+class DDIMConfig(BaseModel):
     batch_size: int
     epochs: int
 
@@ -12,6 +13,9 @@ class DDPMConfig(BaseModel):
     time_embedding_dim: int
     image_size: Tuple[int, int]
     image_channels: int
+
+    ddim_timesteps: int
+    eta: float
 
     lr: float
     betas: Tuple[float, float]

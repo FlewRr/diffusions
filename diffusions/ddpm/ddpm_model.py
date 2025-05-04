@@ -2,34 +2,24 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from diffusions.ddpm.ddpm_config import CosineSchedulerConfig, LinearSchedulerConfig
+from diffusions.config import LinearSchedulerConfig, CosineSchedulerConfig
+from diffusions.model import BaseDiffusionModel
 from diffusions.schedulers.cosine_scheduler import CosineScheduler
 from diffusions.schedulers.linear_scheduler import LinearScheduler
 from diffusions.unet import UnetWithAttention
 
 
-class DDPM(nn.Module):
+class DDPM(BaseDiffusionModel):
     def __init__(self, config):
-        super().__init__()
-        self.config = config
-        self.model = UnetWithAttention(in_channels=config.input_channels, hid_channels=config.hidden_channels,
-                                       out_channels=config.output_channels, time_emb_dim=config.time_embedding_dim)
+        super().__init__(config)
 
-        self.scheduler = self._setup_scheduler()
+    def _setup_model(self):
+        model = UnetWithAttention(in_channels=self.config.input_channels,
+                                  hid_channels=self.config.hidden_channels,
+                                  out_channels=self.config.output_channels,
+                                  time_emb_dim=self.config.time_embedding_dim)
 
-        self.T = self.config.scheduler.timesteps
-        self.image_size = self.config.image_size
-        self.image_channels = self.config.image_channels
-        self.device = self.config.device
-        self.use_amp = self.config.use_amp
-
-        alphas, alphas_hat = self.scheduler.get_alphas()
-        betas, betas_hat = self.scheduler.get_betas()
-
-        self.register_buffer("alphas", alphas)
-        self.register_buffer("alphas_hat", alphas_hat)
-        self.register_buffer("betas", betas)
-        self.register_buffer("betas_hat", betas_hat)
+        return model
 
     def _setup_scheduler(self):
         match self.config.scheduler:
@@ -37,15 +27,6 @@ class DDPM(nn.Module):
                 return LinearScheduler(self.config.scheduler.timesteps, self.config.scheduler.beta_min, self.config.scheduler.beta_max)
             case CosineSchedulerConfig():
                 return CosineScheduler(self.config.scheduler.timesteps, self.config.scheduler.s)
-
-    def forward(self, x, t):
-        return self.model(x, t)
-
-    def get_model(self):
-        return self.model
-
-    def save_checkpoint(self, checkpoint_path:str):
-        torch.save(self.model.state_dict(), checkpoint_path)
 
     def sample_xt(self, x0: torch.Tensor, t: torch.Tensor, noise: torch.Tensor=None):
         if noise is None:
@@ -60,7 +41,7 @@ class DDPM(nn.Module):
     def training_step(self, batch) -> float:
         batch = batch.to(self.device)
 
-        t = torch.randint(0, self.T, (batch.shape[0],), device=self.device)
+        t = torch.randint(0, self.timesteps, (batch.shape[0],), device=self.device)
         noise = torch.randn_like(batch)
 
         noisy_batch = self.sample_xt(x0=batch, t=t, noise=noise)
@@ -75,8 +56,7 @@ class DDPM(nn.Module):
     def sample(self, num_samples: int=1):
         x_t = torch.randn(num_samples, self.image_channels, self.image_size[0], self.image_size[1], device=self.device)
 
-        ## TODO: store alphsas in cpu and transfer to cuda when  needed
-        for t in reversed(range(self.T)):
+        for t in reversed(range(self.timesteps)):
             t_batch = torch.full((num_samples,), t, device=self.device, dtype=torch.long)
 
             noise_pred = self.model(x_t, t_batch) # TODO: EMA
