@@ -38,15 +38,15 @@ class DDIM(BaseDiffusionModel):
             case CosineSchedulerConfig():
                 return CosineScheduler(self.config.scheduler.timesteps, self.config.scheduler.s)
 
-    def _get_ddim_schedule(self):
+    def _get_ddim_schedule(self, eps=1e-4):
         ddim_t = torch.linspace(0, self.timesteps-1, self.ddim_timesteps, device=self.device, dtype=torch.long)
 
         ddim_alphas = self.alphas[ddim_t]
         ddim_alphas_prev = torch.cat((ddim_alphas[:1], ddim_alphas[:-1]))
 
         sigmas = self.eta * torch.sqrt(
-            (1. - ddim_alphas_prev) / (1. - ddim_alphas) *
-            (1. - ddim_alphas / ddim_alphas_prev)
+            ((1. - ddim_alphas_prev) / (1. - ddim_alphas).clamp(min=eps)) *
+            (1. - ddim_alphas / ddim_alphas_prev.clamp(min=eps))
         )
 
         return ddim_t, ddim_alphas, ddim_alphas_prev, sigmas
@@ -77,18 +77,17 @@ class DDIM(BaseDiffusionModel):
 
     @torch.no_grad()
     def sample(self, num_samples: int=1):
-        x_t = torch.randn(num_samples, self.images_channels, self.image_size[0], self.image_size[1], device=self.device)
+        x_t = torch.randn(num_samples, self.image_channels, self.image_size[0], self.image_size[1], device=self.device)
 
         for i in reversed(range(self.ddim_timesteps)):
             t = self.ddim_t[i]
-
             t_batch = torch.full((num_samples,), t, device=self.device, dtype=torch.long)
 
             noise_pred = self.model(x_t, t_batch)
 
-            alpha = self.ddim_alphas[t]
-            alpha_prev = self.ddim_alphas_prev[t]
-            sigma = self.sigmas[t]
+            alpha = self.ddim_alphas[i]
+            alpha_prev = self.ddim_alphas_prev[i]
+            sigma = self.sigmas[i]
 
             predicted_x0 = (x_t - (1. - alpha).sqrt() * noise_pred) / alpha.sqrt()
 
@@ -97,7 +96,7 @@ class DDIM(BaseDiffusionModel):
             epsilon = torch.randn_like(x_t) if t > 0 else torch.zeros_like(x_t)
 
             # TODO: check dims and fix if they are wrong (view(-1, 1, 1, 1))
-            print(alpha_prev.sqrt().shape, predicted_x0.shape, direction.shape, sigma.shape, epsilon.shape)
+            # print(alpha_prev.sqrt().shape, predicted_x0.shape, direction.shape, sigma.shape, epsilon.shape)
             x_t = alpha_prev.sqrt() * predicted_x0 + direction + sigma * epsilon
 
         return x_t

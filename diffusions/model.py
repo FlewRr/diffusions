@@ -1,6 +1,7 @@
 from abc import abstractmethod, ABC
 import torch
 import torch.nn as nn
+from torchvision.transforms.functional import to_pil_image
 
 class BaseDiffusionModel(nn.Module, ABC):
     def __init__(self, config):
@@ -40,6 +41,22 @@ class BaseDiffusionModel(nn.Module, ABC):
     def save_checkpoint(self, checkpoint_path: str):
         torch.save(self.model.state_dict(), checkpoint_path)
 
+    def load_from_checkpoint(self, checkpoint_path: str):
+        self.model.load_state_dict(torch.load(checkpoint_path, weights_only=True))
+
+    def sample_images(self, num_samples:int):
+        sampled_images = self.sample(num_samples)
+
+        sampled_images = sampled_images.detach().cpu()
+        sampled_images = (sampled_images + 1) * 0.5  # Rescale from [-1, 1] to [0, 1]
+        sampled_images = torch.clamp(sampled_images, 0, 1)
+
+        images = []
+        for i in range(sampled_images.size(0)):
+            img = sampled_images[i]
+            images.append(to_pil_image(img))
+
+        return images
     @abstractmethod
     def sample_xt(self, x0, t, noise):
         pass
