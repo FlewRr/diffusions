@@ -10,7 +10,7 @@ import wandb
 
 class DDPMTrainer:
     def __init__(self, ddpm: DDPM, config):
-        self.ddpm = ddpm
+        self.ddpm = ddpm.to(config.device)
         self.config = config
         self.transform = self._get_transform()
         self.dataloader = self._setup_dataloader()
