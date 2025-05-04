@@ -42,3 +42,15 @@ Sampling Parameters:
 * num_samples: Number of samples to generate.
 * path_to_save: Path to directory where images will be stored
 
+
+# Configuration
+Yaml configs are used as the configuration for models and training.
+
+Configurable parameters:
+* batch_size, epochs, lr: Training configuration
+* input_channels, output_channels, hidden_channels, time_embedding_dim, image_size, image_channels: U-Net channels configuration
+* data_path: Dataset configuration (if use_cifar10 is True, will use cifar10 for training)
+* scheduler: Scheduling type (cosine, linear), timesteps, s (for cosine), beta_min/beta_max (for linear)
+* use_wandb, use_amp, use_ema, ema_decay: Wandb, amp, EMA usage in training loop
+* eval_num_samples, eval_sampling_epochs, save_checkpoints, save_checkpoints_path, save_checkpoints_epochs: Saving and evaluation configuration
+* ddim_timesteps, eta: Parameters for DDIM sampling
