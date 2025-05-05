@@ -109,6 +109,7 @@ class Trainer:
 
 
     def train(self):
+        self.model.train()
         for epoch in range(1, self.epochs+1):
             total_loss = 0.
 
@@ -132,6 +133,8 @@ class Trainer:
                     self.ema.update(self.model.get_model())
 
             total_loss /= len(self.dataloader)
+
+            self.model.eval()
             if self.use_wandb:
                 self._log_wandb(total_loss, epoch)
 
