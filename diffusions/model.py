@@ -75,8 +75,12 @@ class BaseDiffusionModel(nn.Module, ABC):
 
     def sample_images(self, num_samples:int):
         self.model.eval()
-        sampled_images = self.sample(num_samples)
+        model = self.model.get_model()
 
+        self.ema.apply_shadow(model)
+        sampled_images = self.model.sample(self.eval_num_samples)
+        self.ema.restore(model)
+        
         sampled_images = sampled_images.detach().cpu()
         sampled_images = (sampled_images + 1) * 0.5  # Rescale from [-1, 1] to [0, 1]
         sampled_images = torch.clamp(sampled_images, 0, 1)
