@@ -1,6 +1,5 @@
 from diffusions.datasets import DDPMDataset, CIFAR10ImagesOnly
 from diffusions.model import BaseDiffusionModel
-from diffusions.utils.ema import EMA
 import os
 import torch
 import torch.nn as nn
@@ -26,14 +25,9 @@ class Trainer:
         self.save_checkpoints_epochs = self.config.save_checkpoints_epochs
         self.save_checkpoints_path = self.config.save_checkpoints_path
 
-        self.use_ema = self.config.use_ema
-        self.ema_decay = self.config.ema_decay
         self.use_amp = self.config.use_amp
 
         self.scaler = torch.amp.GradScaler(self.config.device, enabled=self.use_amp)
-
-        if self.use_ema:
-            self.ema = EMA(self.model.get_model(), self.ema_decay)
 
     def _setup_dataloader(self):
         if self.config.dataset.use_cifar10:
@@ -91,10 +85,7 @@ class Trainer:
         if epoch % self.config.eval_sampling_epochs == 0:
             model = self.model.get_model()
 
-            self.ema.apply_shadow(model)
             sampled_images = self.model.sample(self.eval_num_samples)
-            self._log_wandb_images(sampled_images, epoch)
-            self.ema.restore(model)
 
     def _save_checkpoint(self, epoch: int):
         checkpoint_path = self.save_checkpoints_path
@@ -131,8 +122,7 @@ class Trainer:
                 total_loss += loss.item()
                 epoch_bar.set_postfix(loss=loss.item())
 
-                if self.use_ema:
-                    self.ema.update(self.model.get_model())
+                self.model.update_ema()
 
             total_loss /= len(self.dataloader)
 

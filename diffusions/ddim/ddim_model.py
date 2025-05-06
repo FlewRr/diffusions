@@ -77,6 +77,8 @@ class DDIM(BaseDiffusionModel):
 
     @torch.no_grad()
     def sample(self, num_samples: int=1):
+        self.ema.apply_shadow(self.model)
+
         x_t = torch.randn(num_samples, self.image_channels, self.image_size[0], self.image_size[1], device=self.device)
 
         for i in reversed(range(self.ddim_timesteps)):
@@ -99,4 +101,35 @@ class DDIM(BaseDiffusionModel):
             # print(alpha_prev.sqrt().shape, predicted_x0.shape, direction.shape, sigma.shape, epsilon.shape)
             x_t = alpha_prev.sqrt() * predicted_x0 + direction + sigma * epsilon
 
+        self.ema.restore(self.model)
+
         return x_t
+
+    def _sample_for_gif(self, num_samples: int, step: int):
+        self.ema.apply_shadow(self.model)
+
+        x_overtime = []
+        x_t = torch.randn(num_samples, self.image_channels, self.image_size[0], self.image_size[1], device=self.device)
+
+        for i in reversed(range(self.ddim_timesteps)):
+            t = self.ddim_t[i]
+            t_batch = torch.full((num_samples,), t, device=self.device, dtype=torch.long)
+
+            noise_pred = self.model(x_t, t_batch)
+
+            alpha = self.ddim_alphas[i]
+            alpha_prev = self.ddim_alphas_prev[i]
+            sigma = self.sigmas[i]
+
+            predicted_x0 = (x_t - (1. - alpha).sqrt() * noise_pred) / alpha.sqrt()
+
+            direction = (1 - alpha_prev - torch.square(sigma)).sqrt() * noise_pred
+            epsilon = torch.randn_like(x_t) if t > 0 else torch.zeros_like(x_t)
+            x_t = alpha_prev.sqrt() * predicted_x0 + direction + sigma * epsilon
+
+            if t % step == 0:
+                x_overtime.append(x_t.cpu())
+
+        self.ema.restore(self.model)
+
+        return x_overtime

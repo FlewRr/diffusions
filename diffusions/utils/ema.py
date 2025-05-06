@@ -28,3 +28,15 @@ class EMA:
             if param.requires_grad:
                 param.data.copy_(self.backup[name])
         self.backup = {}
+
+    def state_dict(self):
+        return {
+            'decay': self.decay,
+            'shadow': self.shadow
+        }
+
+    def load_state_dict(self, state_dict):
+        self.decay = state_dict['decay']
+        self.shadow = {
+            k: v.clone() for k, v in state_dict['shadow'].items()
+        }

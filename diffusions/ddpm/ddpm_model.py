@@ -54,6 +54,8 @@ class DDPM(BaseDiffusionModel):
 
     @torch.no_grad()
     def sample(self, num_samples: int=1):
+        self.ema.apply_shadow(self.model)
+
         x_t = torch.randn(num_samples, self.image_channels, self.image_size[0], self.image_size[1], device=self.device)
 
         for t in reversed(range(self.timesteps)):
@@ -71,4 +73,34 @@ class DDPM(BaseDiffusionModel):
 
             x_t = mean + std * noise
 
+        self.ema.restore(self.model)
+
         return x_t
+
+    def _sample_for_gif(self, num_samples: int, step: int):
+        self.ema.apply_shadow(self.model)
+
+        x_overtime = []
+        x_t = torch.randn(num_samples, self.image_channels, self.image_size[0], self.image_size[1], device=self.device)
+
+        for t in reversed(range(self.timesteps)):
+            t_batch = torch.full((num_samples,), t, device=self.device, dtype=torch.long)
+
+            noise_pred = self.model(x_t, t_batch)
+
+            alpha = self.alphas[t]
+            alpha_sqrt = alpha.sqrt()
+            alpha_hat = self.alphas_hat[t]
+
+            mean = (1. / alpha_sqrt) * (x_t - ((1. - alpha) / (1. - alpha_hat).sqrt()) * noise_pred)
+            std = self.betas_hat[t].sqrt()
+            noise = torch.randn_like(x_t) if t > 0 else 0
+
+            x_t = mean + std * noise
+
+            if t % step == 0:
+                x_overtime.append(x_t.cpu())
+
+        self.ema.restore(self.model)
+
+        return x_overtime
