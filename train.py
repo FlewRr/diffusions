@@ -22,7 +22,10 @@ def main(config_path: Path, model: str, wandb_key: str = ""):
     else:
         raise AttributeError("Unknown model type")
 
-    if config.use_wandb and wandb_key:
+    if config.use_wandb:
+        if not wandb_key:
+            raise RuntimeError("Wandb usage is turned on but wandb key wasn't passed.")
+
         os.environ['WANDB_API_KEY'] = wandb_key
         wandb.login()
 
