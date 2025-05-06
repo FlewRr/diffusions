@@ -59,7 +59,6 @@ class DDPM(BaseDiffusionModel):
         for t in reversed(range(self.timesteps)):
             t_batch = torch.full((num_samples,), t, device=self.device, dtype=torch.long)
 
-            noise_pred = self.model(x_t, t_batch) # TODO: EMA
             noise_pred = self.model(x_t, t_batch)
 
             alpha = self.alphas[t]
