@@ -11,7 +11,7 @@ import wandb
 class Trainer:
     def __init__(self, model: BaseDiffusionModel, config):
         self.config = config
-        self.model = model.to(self.config.device)
+        self.model = model
         self.transform = self._setup_transform()
         self.dataloader = self._setup_dataloader()
         self.optimizer = self._setup_optimizer()
@@ -109,7 +109,7 @@ class Trainer:
 
         if self.use_wandb:
             wandb.save(checkpoint_path)
-    
+
     def train(self):
         self.model.train()
         for epoch in range(1, self.epochs+1):

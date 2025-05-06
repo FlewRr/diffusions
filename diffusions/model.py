@@ -27,6 +27,8 @@ class BaseDiffusionModel(nn.Module, ABC):
         self.register_buffer("betas", betas)
         self.register_buffer("betas_hat", betas_hat)
 
+        self.to(self.device)
+
     @abstractmethod
     def _setup_model(self):
         pass
