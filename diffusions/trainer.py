@@ -89,6 +89,7 @@ class Trainer:
             model = self.model.get_model()
 
             sampled_images = self.model.sample(self.eval_num_samples)
+            self._log_wandb_images(sampled_images, epoch)
 
     def _save_checkpoint(self, epoch: int):
         checkpoint_path = self.save_checkpoints_path

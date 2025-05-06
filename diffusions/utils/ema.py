@@ -11,6 +11,11 @@ class EMA:
             if param.requires_grad:
                 self.shadow[name] = param.data.cpu().clone()
 
+    def load(self, model):
+        for name, param in model.named_parameters():
+            if param.requires_grad:
+                self.shadow[name] = param.data.cpu().clone()
+
     def update(self, model):
         for name, param in model.named_parameters():
             if param.requires_grad:
