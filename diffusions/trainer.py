@@ -107,7 +107,9 @@ class Trainer:
         checkpoint_path += f"model_{epoch}.pt"
         self.model.save_checkpoint(checkpoint_path)
 
-
+        if self.use_wandb:
+            wandb.save(checkpoint_path)
+    
     def train(self):
         self.model.train()
         for epoch in range(1, self.epochs+1):
