@@ -47,6 +47,7 @@ class BaseDiffusionModel(nn.Module, ABC):
 
     def sample_images(self, num_samples:int):
         sampled_images = self.sample(num_samples)
+        self.model.eval()
 
         sampled_images = sampled_images.detach().cpu()
         sampled_images = (sampled_images + 1) * 0.5  # Rescale from [-1, 1] to [0, 1]
