@@ -19,7 +19,7 @@ class EMA:
     def update(self, model):
         for name, param in model.named_parameters():
             if param.requires_grad:
-                new_weights = self.decay * self.shadow[name] + (1. - self.decay) * param.data.cpu()
+                new_weights = self.decay * self.shadow[name].cpu() + (1. - self.decay) * param.data.cpu()
                 self.shadow[name] = new_weights.clone()
 
     def apply_shadow(self, model):

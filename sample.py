@@ -8,10 +8,9 @@ import yaml
 @click.command()
 @click.option("--config_path", type=Path, required=True)
 @click.option("--model", type=str, required=True)
-@click.option("--checkpoint_path", type=str, required=True)
 @click.option("--num_samples", type=int, required=True)
 @click.option("--path_to_save", type=str, required=False)
-def main(config_path: Path, model: str, checkpoint_path: str, num_samples: int, path_to_save: str=""):
+def main(config_path: Path, model: str, num_samples: int, path_to_save: str=""):
     with open(config_path, "r") as f:
         data = yaml.safe_load(f)
 
