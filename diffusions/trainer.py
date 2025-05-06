@@ -86,8 +86,6 @@ class Trainer:
         wandb.log({"loss": total_loss})
 
         if epoch % self.config.eval_sampling_epochs == 0:
-            model = self.model.get_model()
-
             sampled_images = self.model.sample(self.eval_num_samples)
             self._log_wandb_images(sampled_images, epoch)
 
