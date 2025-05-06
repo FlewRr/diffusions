@@ -2,6 +2,9 @@ from abc import abstractmethod, ABC
 import torch
 import torch.nn as nn
 from torchvision.transforms.functional import to_pil_image
+import torchvision.utils as vutils
+import imageio
+import numpy as np
 
 class BaseDiffusionModel(nn.Module, ABC):
     def __init__(self, config):
@@ -45,6 +48,30 @@ class BaseDiffusionModel(nn.Module, ABC):
         self.model.load_state_dict(torch.load(checkpoint_path, weights_only=True))
         self.model.load_state_dict(torch.load(checkpoint_path, weights_only=True, map_location=torch.device(self.device)))
 
+    def _sample_for_gif(self, num_samples: int, step: int = 25):
+        x_overtime = []
+        x_t = torch.randn(num_samples, self.image_channels, self.image_size[0], self.image_size[1], device=self.device)
+
+        for t in reversed(range(self.timesteps)):
+            t_batch = torch.full((num_samples,), t, device=self.device, dtype=torch.long)
+
+            noise_pred = self.model(x_t, t_batch)
+
+            alpha = self.alphas[t]
+            alpha_sqrt = alpha.sqrt()
+            alpha_hat = self.alphas_hat[t]
+
+            mean = (1. / alpha_sqrt) * (x_t - ((1. - alpha) / (1. - alpha_hat).sqrt()) * noise_pred)
+            std = self.betas_hat[t].sqrt()
+            noise = torch.randn_like(x_t) if t > 0 else 0
+
+            x_t = mean + std * noise
+
+            if t % step == 0:
+                x_overtime.append(x_t)
+
+        return x_overtime
+
     def sample_images(self, num_samples:int):
         self.model.eval()
         sampled_images = self.sample(num_samples)
@@ -59,6 +86,22 @@ class BaseDiffusionModel(nn.Module, ABC):
             images.append(to_pil_image(img))
 
         return images
+
+    def sample_images_for_gif(self, num_samples: int, gif_path: str, duration: float = 0.2):
+        self.model.eval()
+        sampled_images = self._sample_for_gif(num_samples)
+
+        frames = []
+        for sampled_image in sampled_images:
+            print(1)
+            grid = vutils.make_grid(sampled_image, nrow=num_samples, normalize=True, scale_each=True)
+            np_img = (grid.permute(1, 2, 0).cpu().numpy() * 255).astype(np.uint8)
+            frames.append(np_img)
+
+        gif_path += "gif.gif"
+        print(len(frames), gif_path)
+        imageio.mimsave(gif_path, frames, duration=duration)
+
     @abstractmethod
     def sample_xt(self, x0, t, noise):
         pass
