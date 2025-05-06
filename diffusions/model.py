@@ -46,8 +46,8 @@ class BaseDiffusionModel(nn.Module, ABC):
         self.model.load_state_dict(torch.load(checkpoint_path, weights_only=True, map_location=torch.device(self.device)))
 
     def sample_images(self, num_samples:int):
-        sampled_images = self.sample(num_samples)
         self.model.eval()
+        sampled_images = self.sample(num_samples)
 
         sampled_images = sampled_images.detach().cpu()
         sampled_images = (sampled_images + 1) * 0.5  # Rescale from [-1, 1] to [0, 1]
