@@ -60,6 +60,7 @@ class DDPM(BaseDiffusionModel):
             t_batch = torch.full((num_samples,), t, device=self.device, dtype=torch.long)
 
             noise_pred = self.model(x_t, t_batch) # TODO: EMA
+            noise_pred = self.model(x_t, t_batch)
 
             alpha = self.alphas[t]
             alpha_sqrt = alpha.sqrt()
