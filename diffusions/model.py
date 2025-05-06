@@ -49,7 +49,7 @@ class BaseDiffusionModel(nn.Module, ABC):
     def load_from_checkpoint(self, checkpoint_path: str):
         self.model.load_state_dict(torch.load(checkpoint_path, weights_only=True, map_location=torch.device(self.device)))
 
-    def _sample_for_gif(self, num_samples: int, step: int = 25):
+    def _sample_for_gif(self, num_samples: int, step: int = 10):
         x_overtime = []
         x_t = torch.randn(num_samples, self.image_channels, self.image_size[0], self.image_size[1], device=self.device)
 
@@ -100,7 +100,7 @@ class BaseDiffusionModel(nn.Module, ABC):
             frames.append(np_img)
 
         gif_path += "gif.gif"
-        print(len(frames), gif_path)
+
         imageio.mimsave(gif_path, frames, duration=duration)
 
     @abstractmethod
