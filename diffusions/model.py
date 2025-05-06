@@ -69,7 +69,7 @@ class BaseDiffusionModel(nn.Module, ABC):
             x_t = mean + std * noise
 
             if t % step == 0:
-                x_overtime.append(x_t)
+                x_overtime.append(x_t.cpu())
 
         return x_overtime
 
