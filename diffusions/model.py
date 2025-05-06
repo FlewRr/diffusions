@@ -1,4 +1,6 @@
 from abc import abstractmethod, ABC
+from typing import OrderedDict
+
 import torch
 import torch.nn as nn
 from torchvision.transforms.functional import to_pil_image
@@ -36,36 +38,25 @@ class BaseDiffusionModel(nn.Module, ABC):
 
         self.to(self.device)
 
-    @abstractmethod
-    def _setup_model(self):
-        pass
-
-    @abstractmethod
-    def _setup_scheduler(self):
-        pass
-
     def forward(self, x, t):
         return self.model(x, t)
 
     def get_model(self):
         return self.model
 
-    def save_checkpoint(self, checkpoint_path: str):
-        state = self.model.state_dict()
-        state["ema"] = self.ema.state_dict()
+    def state_dict(self):
+        return self.model.state_dict()
 
-        torch.save(state, checkpoint_path)
+    def ema_state_dict(self):
+        return self.ema.state_dict()
 
-    def load_from_checkpoint(self, checkpoint_path: str):
-        state = torch.load(checkpoint_path, weights_only=True, map_location=torch.device(self.device))
+    def load_from_checkpoint(self, state: OrderedDict):
+        self.model.load_state_dict(state["model"])
 
         if "ema" in state.keys():
-            ema_state = state.pop("ema", None)
-            self.ema.load_state_dict(ema_state)
+            self.ema.load_state_dict(state["ema"])
         else:
             self.ema.shadow(self.model)
-
-        self.model.load_state_dict(state)
 
     def sample_images(self, num_samples:int):
         self.model.eval()
@@ -98,6 +89,14 @@ class BaseDiffusionModel(nn.Module, ABC):
 
     def update_ema(self):
         self.ema.update(self.model)
+
+    @abstractmethod
+    def _setup_model(self):
+        pass
+
+    @abstractmethod
+    def _setup_scheduler(self):
+        pass
 
     @abstractmethod
     def sample_xt(self, x0, t, noise):

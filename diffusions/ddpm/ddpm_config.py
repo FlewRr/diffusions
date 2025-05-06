@@ -28,5 +28,7 @@ class DDPMConfig(BaseModel):
     save_checkpoints_path: str
     num_workers: int
 
+    checkpoint_path: Optional[str] = ""
+
     scheduler: SchedulerConfig
     dataset: DatasetConfig

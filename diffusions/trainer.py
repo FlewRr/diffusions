@@ -24,10 +24,14 @@ class Trainer:
         self.save_checkpoints = self.config.save_checkpoints
         self.save_checkpoints_epochs = self.config.save_checkpoints_epochs
         self.save_checkpoints_path = self.config.save_checkpoints_path
+        self.checkpoint_path = self.config.checkpoint_path
 
         self.use_amp = self.config.use_amp
 
         self.scaler = torch.amp.GradScaler(self.config.device, enabled=self.use_amp)
+
+        if self.checkpoint_path:
+            self._load_checkpoint(self.checkpoint_path)
 
     def _setup_dataloader(self):
         if self.config.dataset.use_cifar10:
@@ -79,7 +83,6 @@ class Trainer:
         wandb.log({"generated_samples": images, "epoch": epoch})
 
     def _log_wandb(self, total_loss: float, epoch: int):
-
         wandb.log({"loss": total_loss})
 
         if epoch % self.config.eval_sampling_epochs == 0:
@@ -96,10 +99,29 @@ class Trainer:
             return  # TODO: add exception
 
         checkpoint_path += f"model_{epoch}.pt"
-        self.model.save_checkpoint(checkpoint_path)
+
+        state = {
+            "model": self.model.state_dict(),
+            "optimizer": self.optimizer.state_dict(),
+            "ema": self.model.ema_state_dict()
+        }
+
+        torch.save(state, checkpoint_path)
 
         if self.use_wandb:
             wandb.save(checkpoint_path)
+
+    def _load_checkpoint(self, checkpoint_path: str):
+        state = torch.load(checkpoint_path, weights_only=True, map_location=torch.device(self.device))
+
+        if "model" in state:
+            self.model.load_from_checkpoint(state)
+            print("Successfully loaded model state dict.")
+
+        if "optimizer" in state:
+            self.optimizer.load_state_dict(state["optimizer"])
+            print("Successfully loaded optimizer state dict.")
+
 
     def train(self):
         self.model.train()

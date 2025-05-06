@@ -16,7 +16,7 @@ scheduler:
 lr: 1e-4
 betas: [0.9, 0.999]
 device: "cpu"
-use_wandb: True
+use_wandb: False
 use_amp: False
 use_ema: True
 ema_decay: 0.999
@@ -26,3 +26,4 @@ save_checkpoints: True
 save_checkpoints_epochs: 5
 save_checkpoints_path: "checkpoints/"
 num_workers: 0
+checkpoint_path: ""
