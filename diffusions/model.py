@@ -45,7 +45,6 @@ class BaseDiffusionModel(nn.Module, ABC):
         torch.save(self.model.state_dict(), checkpoint_path)
 
     def load_from_checkpoint(self, checkpoint_path: str):
-        self.model.load_state_dict(torch.load(checkpoint_path, weights_only=True))
         self.model.load_state_dict(torch.load(checkpoint_path, weights_only=True, map_location=torch.device(self.device)))
 
     def _sample_for_gif(self, num_samples: int, step: int = 25):
