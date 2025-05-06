@@ -94,7 +94,6 @@ class BaseDiffusionModel(nn.Module, ABC):
 
         frames = []
         for sampled_image in sampled_images:
-            print(1)
             grid = vutils.make_grid(sampled_image, nrow=num_samples, normalize=True, scale_each=True)
             np_img = (grid.permute(1, 2, 0).cpu().numpy() * 255).astype(np.uint8)
             frames.append(np_img)
