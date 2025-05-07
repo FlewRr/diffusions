@@ -6,7 +6,7 @@ from diffusions.config import LinearSchedulerConfig, CosineSchedulerConfig
 from diffusions.model import BaseDiffusionModel
 from diffusions.schedulers.cosine_scheduler import CosineScheduler
 from diffusions.schedulers.linear_scheduler import LinearScheduler
-from diffusions.unet import UnetWithAttention
+from diffusions.unet import UnetWithAttention, DeeperUnet
 
 
 class DDPM(BaseDiffusionModel):
@@ -14,10 +14,21 @@ class DDPM(BaseDiffusionModel):
         super().__init__(config)
 
     def _setup_model(self):
-        model = UnetWithAttention(in_channels=self.config.input_channels,
-                                  hid_channels=self.config.hidden_channels,
-                                  out_channels=self.config.output_channels,
-                                  time_emb_dim=self.config.time_embedding_dim)
+        ## TODO: change to readable from config
+        if self.config.image_size == (64, 64):
+            model = DeeperUnet(
+                in_channels=self.config.input_channels,
+                hid_channels=self.config.hidden_channels,
+                out_channels=self.config.output_channels,
+                time_emb_dim=self.config.time_embedding_dim
+            )
+        else:
+            model = UnetWithAttention(in_channels=self.config.input_channels,
+                                    hid_channels=self.config.hidden_channels,
+                                    out_channels=self.config.output_channels,
+                                    time_emb_dim=self.config.time_embedding_dim)
+
+        print(model)
 
         return model
 

@@ -1,1 +1,1 @@
-from .unet import UnetWithAttention
+from .unet import UnetWithAttention, DeeperUnet
