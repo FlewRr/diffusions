@@ -27,6 +27,7 @@ class DDPMConfig(BaseModel):
     save_checkpoints_epochs: int
     save_checkpoints_path: str
     num_workers: int
+    max_grad_norm: float
 
     checkpoint_path: Optional[str] = ""
 

@@ -25,7 +25,7 @@ class Trainer:
         self.save_checkpoints_epochs = self.config.save_checkpoints_epochs
         self.save_checkpoints_path = self.config.save_checkpoints_path
         self.checkpoint_path = self.config.checkpoint_path
-
+        self.max_grad_norm  = self.config.max_grad_norm if self.config.max_grad_norm > 0 else float('inf') # if max_grad_norm is set to zero or less, wouldn't use gradient clipping
         self.use_amp = self.config.use_amp
 
         self.scaler = torch.amp.GradScaler(self.config.device, enabled=self.use_amp)
@@ -134,10 +134,12 @@ class Trainer:
 
                 if self.use_amp:
                     self.scaler.scale(loss).backward()
+                    torch.nn.utils.clip_grad_norm_(self.model.get_model().parameters(), self.max_grad_norm)
                     self.scaler.step(self.optimizer)
                     self.scaler.update()
                 else:
                     loss.backward()
+                    torch.nn.utils.clip_grad_norm_(self.model.get_model().parameters(), self.max_grad_norm)
                     self.optimizer.step()
 
                 total_loss += loss.item()
