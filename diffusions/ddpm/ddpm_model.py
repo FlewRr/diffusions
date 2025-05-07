@@ -28,8 +28,6 @@ class DDPM(BaseDiffusionModel):
                                     out_channels=self.config.output_channels,
                                     time_emb_dim=self.config.time_embedding_dim)
 
-        print(model)
-
         return model
 
     def _setup_scheduler(self):
