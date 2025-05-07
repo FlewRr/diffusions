@@ -26,4 +26,5 @@ save_checkpoints: True
 save_checkpoints_epochs: 5
 save_checkpoints_path: "checkpoints/"
 num_workers: 0
+checkpoint_path: ""max_grad_norm: 1.0
 checkpoint_path: ""
