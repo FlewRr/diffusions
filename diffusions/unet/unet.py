@@ -5,7 +5,11 @@ from diffusions.unet.encoder import EncoderWithAttention, DeeperEncoder
 
 
 class UnetWithAttention(nn.Module):
-    def __init__(self, in_channels=3, hid_channels=64, out_channels=3, time_emb_dim=256):
+    def __init__(self,
+                 in_channels: int=3,
+                 hid_channels: int=64,
+                 out_channels: int=3,
+                 time_emb_dim: int=256):
         super(UnetWithAttention, self).__init__()
         self.time_emb = nn.Sequential(
             SinusoidalTimeEmbedding(time_emb_dim),
@@ -25,7 +29,9 @@ class UnetWithAttention(nn.Module):
         self.final_conv = nn.Conv2d(in_channels=hid_channels * 2, out_channels=out_channels, kernel_size=3, stride=1,
                                     padding=1)
 
-    def forward(self, x, t):
+    def forward(self,
+                x: torch.Tensor,
+                t: torch.Tensor) -> torch.Tensor:
         t = self.time_emb(t)
         x, encoder_outputs = self.encoder(x, t)
         x = self.bottleneck(x, t)
@@ -36,7 +42,11 @@ class UnetWithAttention(nn.Module):
 
 
 class DeeperUnet(nn.Module):
-    def __init__(self, in_channels=3, hid_channels=64, out_channels=3, time_emb_dim=256):
+    def __init__(self,
+                 in_channels: int=3,
+                 hid_channels: int=64,
+                 out_channels: int=3,
+                 time_emb_dim: int=256):
         super(DeeperUnet, self).__init__()
         self.time_emb = nn.Sequential(
             SinusoidalTimeEmbedding(time_emb_dim),
@@ -56,7 +66,9 @@ class DeeperUnet(nn.Module):
         self.final_conv = nn.Conv2d(in_channels=hid_channels*2, out_channels=out_channels, kernel_size=3, stride=1,
                                     padding=1)
 
-    def forward(self, x, t):
+    def forward(self,
+                x: torch.Tensor,
+                t: torch.Tensor) -> torch.Tensor:
         t = self.time_emb(t)
         x, encoder_outputs = self.encoder(x, t)
         x = self.bottleneck(x, t)

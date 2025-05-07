@@ -1,6 +1,8 @@
 from diffusions.datasets import DDPMDataset, CIFAR10ImagesOnly
 from diffusions.model import BaseDiffusionModel
+from diffusions.config
 import os
+from pydantic import BaseModel
 import torch
 import torch.nn as nn
 from torchvision import transforms as T
@@ -8,7 +10,14 @@ from tqdm import tqdm
 import wandb
 
 class Trainer:
-    def __init__(self, model: BaseDiffusionModel, config):
+    def __init__(self,
+                 model: BaseDiffusionModel,
+                 config: BaseModel):
+        """
+
+        :param model: DiffusionModel to train
+        :param config: Training config
+        """
         self.config = config
         self.model = model
         self.transform = self._setup_transform()

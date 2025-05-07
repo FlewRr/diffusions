@@ -3,7 +3,11 @@ import torch
 import torch.nn as nn
 
 class ConvBlock(nn.Module):
-    def __init__(self, in_channels, out_channels, hid_channels, time_emb_dim=256):
+    def __init__(self,
+        in_channels: int,
+        out_channels: int,
+        hid_channels: int,
+        time_emb_dim: int=256):
         super(ConvBlock, self).__init__()
         self.time_mlp = nn.Linear(time_emb_dim, hid_channels)
 
@@ -13,7 +17,9 @@ class ConvBlock(nn.Module):
         self.relu = nn.SiLU()
         self.dropout = nn.Dropout(p=0.1)
 
-    def forward(self, x, t):
+    def forward(self,
+                x: torch.Tensor,
+                t: torch.Tensor) -> torch.Tensor:
         t = self.time_mlp(t)
         x = self.conv1(x)
         x += t[:, :, None, None]
@@ -25,7 +31,11 @@ class ConvBlock(nn.Module):
 
 
 class ConvBlockWithNorm(nn.Module):
-    def __init__(self, in_channels, out_channels, hid_channels, time_emb_dim=256):
+    def __init__(self,
+                 in_channels: int,
+                 out_channels: int,
+                 hid_channels: int,
+                 time_emb_dim: int=256):
         super(ConvBlockWithNorm, self).__init__()
         self.time_mlp = nn.Linear(time_emb_dim, hid_channels)
 
@@ -42,7 +52,9 @@ class ConvBlockWithNorm(nn.Module):
         self.gn1 = nn.GroupNorm(num_groups=num_groups1, num_channels=hid_channels)
         self.gn2 = nn.GroupNorm(num_groups=num_groups2, num_channels=out_channels)
 
-    def forward(self, x, t):
+    def forward(self,
+                x: torch.Tensor,
+                t: torch.Tensor) -> torch.Tensor:
         t = self.time_mlp(t)
         x = self.gn1(self.conv1(x))
         x += t[:, :, None, None]
@@ -54,11 +66,13 @@ class ConvBlockWithNorm(nn.Module):
 
 
 class SinusoidalTimeEmbedding(nn.Module):
-    def __init__(self, dim):
+    def __init__(self,
+                 dim: int):
         super().__init__()
         self.dim = dim
 
-    def forward(self, t):
+    def forward(self,
+                t: torch.Tensor) -> torch.Tensror:
         half = self.dim // 2
         emb = math.log(10000) / (half - 1)
         emb = torch.exp(torch.arange(half, device=t.device) * -emb)
@@ -67,13 +81,16 @@ class SinusoidalTimeEmbedding(nn.Module):
 
 
 class SelfAttention2D(nn.Module):
-    def __init__(self, channels, num_heads=4):
+    def __init__(self,
+                 channels: int,
+                 num_heads: int=4):
         super().__init__()
 
         self.ln = nn.LayerNorm(channels)
         self.attn = nn.MultiheadAttention(embed_dim=channels, num_heads=num_heads, batch_first=True)
 
-    def forward(self, x):
+    def forward(self,
+                x: torch.Tensor) -> torch.Tensor:
         B, C, H, W = x.shape
         x_input = x
 

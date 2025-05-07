@@ -1,4 +1,5 @@
 from abc import abstractmethod, ABC
+from pydantic import BaseModel
 from typing import OrderedDict
 
 import torch
@@ -11,7 +12,11 @@ import numpy as np
 from diffusions.utils.ema import EMA
 
 class BaseDiffusionModel(nn.Module, ABC):
-    def __init__(self, config):
+    def __init__(self,
+                 config: BaseModel):
+        """
+        :param config: Training config
+        """
         super().__init__()
         self.config = config
         self.model = self._setup_model()
@@ -38,7 +43,9 @@ class BaseDiffusionModel(nn.Module, ABC):
 
         self.to(self.device)
 
-    def forward(self, x, t):
+    def forward(self,
+                x: torch.Tensor,
+                t: torch.Tensor):
         return self.model(x, t)
 
     def get_model(self):
@@ -50,7 +57,8 @@ class BaseDiffusionModel(nn.Module, ABC):
     def ema_state_dict(self):
         return self.ema.state_dict()
 
-    def load_from_checkpoint(self, state: OrderedDict):
+    def load_from_checkpoint(self,
+                             state: OrderedDict):
         self.model.load_state_dict(state["model"])
 
         if "ema" in state.keys():
@@ -58,13 +66,15 @@ class BaseDiffusionModel(nn.Module, ABC):
         else:
             self.ema.load(self.model)
 
-    def load_state_dict(self, state_dict_path: str):
+    def load_state_dict(self,
+                        state_dict_path: str):
         state = torch.load(state_dict_path, weights_only=True, map_location=torch.device(self.device))
 
         self.model.load_state_dict(state)
         self.ema.load(self.model)
 
-    def sample_images(self, num_samples:int):
+    def sample_images(self,
+                      num_samples: int):
         self.model.eval()
         sampled_images = self.sample(num_samples)
 
@@ -79,7 +89,10 @@ class BaseDiffusionModel(nn.Module, ABC):
 
         return images
 
-    def sample_images_for_gif(self, num_samples: int, gif_path: str, duration: float = 0.2):
+    def sample_images_for_gif(self,
+                              num_samples: int,
+                              gif_path: str,
+                              duration: float = 0.2):
         self.model.eval()
         sampled_images = self._sample_for_gif(num_samples, step=10)
 
@@ -105,17 +118,24 @@ class BaseDiffusionModel(nn.Module, ABC):
         pass
 
     @abstractmethod
-    def sample_xt(self, x0, t, noise):
+    def sample_xt(self,
+                  x0: torch.Tensor,
+                  t: torch.Tensor,
+                  noise: torch.Tensor):
         pass
 
     @abstractmethod
-    def training_step(self, batch):
+    def training_step(self,
+                      batch: torch.Tensor):
         pass
 
     @abstractmethod
-    def sample(self, num_samples: int):
+    def sample(self,
+               num_samples: int):
         pass
 
     @abstractmethod
-    def _sample_for_gif(self, num_samples: int, step: int):
+    def _sample_for_gif(self,
+                        num_samples: int,
+                        step: int):
         pass
