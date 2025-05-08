@@ -48,20 +48,18 @@ class ConvBlockWithNorm(nn.Module):
 
         # num groups for lower channels shouldn't be calculated as channels // 4
         # basically for lower channels group norm acts like layer norm
-        # num_groups1 = hid_channels // 4 if hid_channels >= 32 else hid_channels
-        # num_groups2 = out_channels // 4 if out_channels >= 32 else out_channels
+        num_groups1 = hid_channels // 4 if hid_channels >= 32 else hid_channels
+        num_groups2 = out_channels // 4 if out_channels >= 32 else out_channels
 
-        # self.gn1 = nn.GroupNorm(num_groups=num_groups1, num_channels=hid_channels)
-        # self.gn2 = nn.GroupNorm(num_groups=num_groups2, num_channels=out_channels)
+        self.gn1 = nn.GroupNorm(num_groups=num_groups1, num_channels=hid_channels)
+        self.gn2 = nn.GroupNorm(num_groups=num_groups2, num_channels=out_channels)
 
     def forward(self, x: torch.Tensor, t: torch.Tensor) -> torch.Tensor:
         t = self.time_mlp(t)
-        # x = self.gn1(self.conv1(x))
-        x = self.conv1(x)
+        x = self.gn1(self.conv1(x))
         x += t[:, :, None, None]
         x = self.relu(x)
-        x  = self.conv2(x)
-        # x = self.gn2(self.conv2(x))
+        x = self.gn2(self.conv2(x))
         x = self.relu(x)
 
         return x
