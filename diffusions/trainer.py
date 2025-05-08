@@ -1,6 +1,5 @@
 from diffusions.datasets import DDPMDataset, CIFAR10ImagesOnly
 from diffusions.model import BaseDiffusionModel
-from diffusions.config
 import os
 from pydantic import BaseModel
 import torch

@@ -1,5 +1,5 @@
 from diffusions.config import DatasetConfig, SchedulerConfig
-W, Field
+from pydantic import BaseModel, Field
 from typing import Tuple, Annotated, Literal, Optional
 
 class DDPMConfig(BaseModel):
