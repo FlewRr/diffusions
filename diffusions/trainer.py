@@ -128,7 +128,6 @@ class Trainer:
 
     def train(self) -> nn.Module:
         for epoch in range(1, self.epochs+1):
-            self.model.train()
             total_loss = 0.
 
             epoch_bar = tqdm(self.dataloader, desc=f"Epoch {epoch}/{self.epochs}", leave=False)
@@ -153,7 +152,6 @@ class Trainer:
 
             total_loss /= len(self.dataloader)
 
-            self.model.eval()
             if self.use_wandb:
                 self._log_wandb(total_loss, epoch)
 

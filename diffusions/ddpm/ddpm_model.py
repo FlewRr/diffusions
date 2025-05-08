@@ -52,6 +52,7 @@ class DDPM(BaseDiffusionModel):
         return x0 * sqrt_alpha_hat + minus_sqrt_alpha_hat * noise
 
     def training_step(self, batch: torch.Tensor) -> float:
+        self.model.train()
         batch = batch.to(self.device)
 
         t = torch.randint(0, self.timesteps, (batch.shape[0],), device=self.device)
@@ -67,6 +68,7 @@ class DDPM(BaseDiffusionModel):
 
     @torch.no_grad()
     def sample(self, num_samples: int=1) -> torch.Tensor:
+        self.model.eval()
         self.ema.apply_shadow(self.model)
 
         x_t = torch.randn(num_samples, self.image_channels, self.image_size[0], self.image_size[1], device=self.device)
@@ -91,6 +93,7 @@ class DDPM(BaseDiffusionModel):
         return x_t
 
     def _sample_for_gif(self, num_samples: int, step: int) -> List[torch.Tensor]:
+        self.model.eval()
         self.ema.apply_shadow(self.model)
 
         x_overtime = []
