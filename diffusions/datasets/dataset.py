@@ -14,7 +14,7 @@ class DDPMDataset(torch.utils.data.Dataset):
     def __len__(self):
         return len(self.images)
 
-    def __getitem(self, idx):
+    def __getitem(self, idx: int):
         image_path = self.self.image_paths[idx]
 
         image = Image.open(image_path).convert("RGB")

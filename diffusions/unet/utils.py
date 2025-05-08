@@ -3,11 +3,12 @@ import torch
 import torch.nn as nn
 
 class ConvBlock(nn.Module):
-    def __init__(self,
-        in_channels: int,
-        out_channels: int,
-        hid_channels: int,
-        time_emb_dim: int=256):
+    def __init__(
+            self,
+            in_channels: int,
+            out_channels: int,
+            hid_channels: int,
+            time_emb_dim: int=256):
         super(ConvBlock, self).__init__()
         self.time_mlp = nn.Linear(time_emb_dim, hid_channels)
 
@@ -31,11 +32,12 @@ class ConvBlock(nn.Module):
 
 
 class ConvBlockWithNorm(nn.Module):
-    def __init__(self,
-                 in_channels: int,
-                 out_channels: int,
-                 hid_channels: int,
-                 time_emb_dim: int=256):
+    def __init__(
+            self,
+            in_channels: int,
+            out_channels: int,
+            hid_channels: int,
+            time_emb_dim: int=256):
         super(ConvBlockWithNorm, self).__init__()
         self.time_mlp = nn.Linear(time_emb_dim, hid_channels)
 
@@ -52,9 +54,7 @@ class ConvBlockWithNorm(nn.Module):
         self.gn1 = nn.GroupNorm(num_groups=num_groups1, num_channels=hid_channels)
         self.gn2 = nn.GroupNorm(num_groups=num_groups2, num_channels=out_channels)
 
-    def forward(self,
-                x: torch.Tensor,
-                t: torch.Tensor) -> torch.Tensor:
+    def forward(self, x: torch.Tensor, t: torch.Tensor) -> torch.Tensor:
         t = self.time_mlp(t)
         x = self.gn1(self.conv1(x))
         x += t[:, :, None, None]
@@ -66,8 +66,7 @@ class ConvBlockWithNorm(nn.Module):
 
 
 class SinusoidalTimeEmbedding(nn.Module):
-    def __init__(self,
-                 dim: int):
+    def __init__(self, dim: int):
         super().__init__()
         self.dim = dim
 
@@ -81,16 +80,13 @@ class SinusoidalTimeEmbedding(nn.Module):
 
 
 class SelfAttention2D(nn.Module):
-    def __init__(self,
-                 channels: int,
-                 num_heads: int=4):
+    def __init__(self, channels: int, num_heads: int=4):
         super().__init__()
 
         self.ln = nn.LayerNorm(channels)
         self.attn = nn.MultiheadAttention(embed_dim=channels, num_heads=num_heads, batch_first=True)
 
-    def forward(self,
-                x: torch.Tensor) -> torch.Tensor:
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
         B, C, H, W = x.shape
         x_input = x
 

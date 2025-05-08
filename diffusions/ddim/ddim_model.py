@@ -1,3 +1,7 @@
+from typing import List
+
+from pydantic import BaseModel
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -9,7 +13,9 @@ from diffusions.schedulers.linear_scheduler import LinearScheduler
 from diffusions.unet import UnetWithAttention
 
 class DDIM(BaseDiffusionModel):
-    def __init__(self, config):
+    def __init__(
+            self,
+            config: BaseModel):
         super().__init__(config)
 
         self.eta = self.config.eta
@@ -38,7 +44,7 @@ class DDIM(BaseDiffusionModel):
             case CosineSchedulerConfig():
                 return CosineScheduler(self.config.scheduler.timesteps, self.config.scheduler.s)
 
-    def _get_ddim_schedule(self, eps=1e-4):
+    def _get_ddim_schedule(self, eps: float=1e-4):
         ddim_t = torch.linspace(0, self.timesteps-1, self.ddim_timesteps, device=self.device, dtype=torch.long)
 
         ddim_alphas = self.alphas[ddim_t]
@@ -61,7 +67,7 @@ class DDIM(BaseDiffusionModel):
 
         return x0 * sqrt_alpha_hat + minus_sqrt_alpha_hat * noise
 
-    def training_step(self, batch) -> float:
+    def training_step(self, batch: torch.Tensor) -> float:
         batch = batch.to(self.device)
 
         t = torch.randint(0, self.timesteps, (batch.shape[0],), device=self.device)
@@ -76,7 +82,7 @@ class DDIM(BaseDiffusionModel):
         return loss
 
     @torch.no_grad()
-    def sample(self, num_samples: int=1):
+    def sample(self, num_samples: int=1) -> torch.Tensor:
         self.ema.apply_shadow(self.model)
 
         x_t = torch.randn(num_samples, self.image_channels, self.image_size[0], self.image_size[1], device=self.device)
@@ -105,7 +111,7 @@ class DDIM(BaseDiffusionModel):
 
         return x_t
 
-    def _sample_for_gif(self, num_samples: int, step: int):
+    def _sample_for_gif(self, num_samples: int, step: int) -> List[torch.Tensor]:
         self.ema.apply_shadow(self.model)
 
         x_overtime = []

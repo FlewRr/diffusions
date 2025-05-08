@@ -1,3 +1,5 @@
+from typing import List
+
 from diffusions.config import LinearSchedulerConfig, CosineSchedulerConfig
 from diffusions.model import BaseDiffusionModel
 from diffusions.schedulers.cosine_scheduler import CosineScheduler
@@ -9,9 +11,10 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-class DDPM(BaseDiffusionModel):
-    def __init__(self,
-                 config: BaseModel):
+    class DDPM(BaseDiffusionModel):
+    def __init__(
+            self,
+            config: BaseModel):
         super().__init__(config)
 
     def _setup_model(self):
@@ -38,10 +41,7 @@ class DDPM(BaseDiffusionModel):
             case CosineSchedulerConfig():
                 return CosineScheduler(self.config.scheduler.timesteps, self.config.scheduler.s)
 
-    def sample_xt(self,
-                  x0: torch.Tensor,
-                  t: torch.Tensor,
-                  noise: torch.Tensor=None):
+    def sample_xt(self, x0: torch.Tensor, t: torch.Tensor, noise: torch.Tensor=None):
         if noise is None:
             noise = torch.randn_like(x0)
 
@@ -51,8 +51,7 @@ class DDPM(BaseDiffusionModel):
 
         return x0 * sqrt_alpha_hat + minus_sqrt_alpha_hat * noise
 
-    def training_step(self,
-                      batch: torch.Tensor) -> float:
+    def training_step(self, batch: torch.Tensor) -> float:
         batch = batch.to(self.device)
 
         t = torch.randint(0, self.timesteps, (batch.shape[0],), device=self.device)
@@ -67,8 +66,7 @@ class DDPM(BaseDiffusionModel):
         return loss
 
     @torch.no_grad()
-    def sample(self,
-               num_samples: int=1):
+    def sample(self, num_samples: int=1) -> torch.Tensor:
         self.ema.apply_shadow(self.model)
 
         x_t = torch.randn(num_samples, self.image_channels, self.image_size[0], self.image_size[1], device=self.device)
@@ -92,9 +90,7 @@ class DDPM(BaseDiffusionModel):
 
         return x_t
 
-    def _sample_for_gif(self,
-                        num_samples: int,
-                        step: int):
+    def _sample_for_gif(self, num_samples: int, step: int) -> List[torch.Tensor]:
         self.ema.apply_shadow(self.model)
 
         x_overtime = []

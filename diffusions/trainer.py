@@ -10,14 +10,10 @@ from tqdm import tqdm
 import wandb
 
 class Trainer:
-    def __init__(self,
-                 model: BaseDiffusionModel,
-                 config: BaseModel):
-        """
-
-        :param model: DiffusionModel to train
-        :param config: Training config
-        """
+    def __init__(
+            self,
+            model: BaseDiffusionModel,
+            config: BaseModel):
         self.config = config
         self.model = model
         self.transform = self._setup_transform()
@@ -131,7 +127,7 @@ class Trainer:
             print("Successfully loaded optimizer state dict.")
 
 
-    def train(self):
+    def train(self) -> nn.Module:
         self.model.train()
         for epoch in range(1, self.epochs+1):
             total_loss = 0.
