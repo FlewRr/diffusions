@@ -1,3 +1,4 @@
+import torch
 import torch.nn as nn
 from diffusions.unet.utils import ConvBlock, SinusoidalTimeEmbedding
 from diffusions.unet.decoder import DecoderWithAttention, DeeperDecoder

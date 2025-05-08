@@ -1,5 +1,6 @@
 from typing import List, Tuple
 
+import torch
 import torch.nn as nn
 from diffusions.unet.utils import ConvBlock, ConvBlockWithNorm, SelfAttention2D
 
