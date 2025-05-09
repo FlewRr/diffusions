@@ -12,9 +12,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 class DDPM(BaseDiffusionModel):
-    def __init__(
-            self,
-            config: BaseModel):
+    def __init__(self, config: BaseModel):
         super().__init__(config)
 
     def _setup_model(self):

@@ -91,9 +91,9 @@ class BaseDiffusionModel(nn.Module, ABC):
 
         return images
 
-    def sample_images_for_gif(self, num_samples: int, gif_path: str, duration: float = 0.2):
+    def sample_images_for_gif(self, num_samples: int, gif_path: str, duration: float = 0.2, step: int = 100):
         self.model.eval()
-        sampled_images = self._sample_for_gif(num_samples, step=10)
+        sampled_images = self._sample_for_gif(num_samples, step=step)
 
         frames = []
         for sampled_image in sampled_images:
