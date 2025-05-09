@@ -24,7 +24,7 @@ def main(config_path: Path, model: str, num_samples: int, path_to_save: str=""):
         raise AttributeError("Unknown model type")
 
     try:
-        checkpoint_path = config["checkpoint_path"]
+        checkpoint_path = config.checkpoint_path
         diffusion_model.load_state_dict(checkpoint_path)
     except:
         print("Something went wrong while loading weights, model is set to default weights.")

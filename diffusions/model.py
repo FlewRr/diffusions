@@ -67,8 +67,14 @@ class BaseDiffusionModel(nn.Module, ABC):
     def load_state_dict(self, state_dict_path: str):
         state = torch.load(state_dict_path, weights_only=True, map_location=torch.device(self.device))
 
-        self.model.load_state_dict(state)
-        self.ema.load(self.model)
+        if "model" in state:
+            model_state = state["model"]
+            self.model.load_state_dict(model_state)
+
+        if "ema" in state:
+            self.ema.load_state_dict(state["ema"])
+        else:
+            self.ema.load(self.model)
 
     def sample_images(self, num_samples: int):
         self.model.eval()
