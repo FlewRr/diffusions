@@ -3,7 +3,7 @@ from diffusions import DDPM, DDPMConfig, DDIMConfig, DDIM, Trainer
 import os
 from pathlib import Path
 import torch
-import tqdm
+from tqdm import tqdm
 import wandb
 import yaml
 
