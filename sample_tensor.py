@@ -3,6 +3,7 @@ from diffusions import DDPM, DDPMConfig, DDIMConfig, DDIM, Trainer
 import os
 from pathlib import Path
 import torch
+import tqdm
 import wandb
 import yaml
 
@@ -10,8 +11,9 @@ import yaml
 @click.option("--config_path", type=Path, required=True)
 @click.option("--model", type=str, required=True)
 @click.option("--num_samples", type=int, required=True)
+@click.option("--batch_size", type=int, required=False)
 @click.option("--path_to_save", type=str, required=False)
-def main(config_path: Path, model: str, num_samples: int, path_to_save: str=""):
+def main(config_path: Path, model: str, num_samples: int, batch_size: int=100, path_to_save: str=""):
     with open(config_path, "r") as f:
         data = yaml.safe_load(f)
 
@@ -30,12 +32,12 @@ def main(config_path: Path, model: str, num_samples: int, path_to_save: str=""):
     except:
         print("Something went wrong while loading weights, model is set to default weights.")
 
-    BATCH_SIZE = 100
-    TOTAL_SAMPLES = 50000
+    BATCH_SIZE = batch_size
+    TOTAL_SAMPLES = num_samples
 
     all_samples = []
 
-    for _ in range(TOTAL_SAMPLES // BATCH_SIZE):
+    for _ in tqdm(range(TOTAL_SAMPLES // BATCH_SIZE)):
         sampled_images = diffusion_model.sample_images(num_samples=BATCH_SIZE)
         all_samples.append(sampled_images)
 
