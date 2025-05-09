@@ -34,7 +34,7 @@ def main(config_path: Path, model: str, num_samples: int, path_to_save: str=""):
         print("Path doesn't exist")
         return
 
-    diffusion_model.sample_images_for_gif(num_samples, path_to_save, duration=3.0)
+    diffusion_model.sample_images_for_gif(num_samples, path_to_save, duration=1.5)
 
 if __name__ == "__main__":
     main()
