@@ -8,10 +8,9 @@ import yaml
 @click.command()
 @click.option("--config_path", type=Path, required=True)
 @click.option("--model", type=str, required=True)
-@click.option("--checkpoint_path", type=str, required=True)
 @click.option("--num_samples", type=int, required=True)
 @click.option("--path_to_save", type=str, required=False)
-def main(config_path: Path, model: str, checkpoint_path: str, num_samples: int, path_to_save: str=""):
+def main(config_path: Path, model: str, num_samples: int, path_to_save: str=""):
     with open(config_path, "r") as f:
         data = yaml.safe_load(f)
 
@@ -25,7 +24,8 @@ def main(config_path: Path, model: str, checkpoint_path: str, num_samples: int, 
         raise AttributeError("Unknown model type")
 
     try:
-        diffusion_model.load_from_checkpoint(checkpoint_path)
+        checkpoint_path = config["checkpoint_path"]
+        diffusion_model.load_state_dict(checkpoint_path)
     except:
         print("Something went wrong while loading weights, model is set to default weights.")
 
