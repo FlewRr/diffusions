@@ -87,6 +87,7 @@ class Trainer:
         wandb.log({"generated_samples": images, "epoch": epoch})
 
     def _log_wandb(self, total_loss: float, epoch: int):
+        self.model.eval()
         wandb.log({"loss": total_loss})
 
         if epoch % self.config.eval_sampling_epochs == 0:
@@ -127,6 +128,7 @@ class Trainer:
 
 
     def train(self) -> nn.Module:
+        self.model.train()
         for epoch in range(1, self.epochs+1):
             total_loss = 0.
 
